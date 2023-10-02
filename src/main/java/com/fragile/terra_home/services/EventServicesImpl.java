@@ -12,6 +12,7 @@ import com.fragile.terra_home.repository.CategoryRepository;
 import com.fragile.terra_home.repository.EventRepository;
 import com.fragile.terra_home.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventServicesImpl implements EventServices {
 
     private final CategoryRepository categoryRepository;
@@ -58,6 +60,22 @@ public class EventServicesImpl implements EventServices {
         updateEventFields(foundEvent, createEventRequest);
         return eventRepository.save(foundEvent);
     }
+
+    @Override
+    public List<Event> filterEvent(String categoryName, String location, LocalDateTime date) {
+        try {
+            log.info("Filtering events with categoryName: {}, location: {}, date: {}", categoryName, location, date);
+
+            List<Event> filterEvent = eventRepository.filterEventsByCategoryLocationDate(categoryName, location, date);
+
+            log.info("Filtered events: {}", filterEvent);
+
+            return filterEvent;
+        } catch (Exception ex) {
+            throw new RuntimeException("Internal Server Error: " + ex.getMessage(), ex);
+        }
+    }
+
 
     private Event findEventById(Long eventId) {
         return eventRepository.findById(eventId)
