@@ -61,27 +61,27 @@ public class GlobalException {
 //        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
 //    }
 
-//    @ExceptionHandler(DataIntegrityViolationException.class)
-//    public ResponseEntity<ErrorDetail> handleDataIntegrityViolationException(DataIntegrityViolationException dEx) {
-//        String message = Objects.requireNonNull(dEx.getRootCause()).getMessage();
-//        String duplicateValue = extractDuplicateValue(message);
-//
-//        if (duplicateValue == null) {
-//            duplicateValue = "Unknown";  // Provide a default value if extraction fails
-//        }
-//        String errorMessage = "Value '" + duplicateValue + "' is already in use with another account.";
-//        ErrorDetail errorDetail = new ErrorDetail(errorMessage, "Encounter duplicate", LocalDateTime.now());
-//        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
-//    }
-//
-//    private String extractDuplicateValue(String message) {
-//        // Split the message by single quotes and check for the value between them
-//        String[] tokens = message.split("'");
-//        if (tokens.length >= 2) {
-//            return tokens[1];  // The value should be at index 1
-//        }
-//        return null;  // Return null if value extraction fails
-//    }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorDetail> handleDataIntegrityViolationException(DataIntegrityViolationException dEx) {
+        String message = Objects.requireNonNull(dEx.getRootCause()).getMessage();
+        String duplicateValue = extractDuplicateValue(message);
+
+        if (duplicateValue == null) {
+            duplicateValue = "Unknown";  // Provide a default value if extraction fails
+        }
+        String errorMessage = "Value '" + duplicateValue + "' is already in use with another account.";
+        ErrorDetail errorDetail = new ErrorDetail(errorMessage, "Encounter duplicate", LocalDateTime.now());
+        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
+    }
+
+    private String extractDuplicateValue(String message) {
+        // Split the message by single quotes and check for the value between them
+        String[] tokens = message.split("'");
+        if (tokens.length >= 2) {
+            return tokens[1];  // The value should be at index 1
+        }
+        return null;  // Return null if value extraction fails
+    }
 
 
     @ExceptionHandler(Exception.class)
