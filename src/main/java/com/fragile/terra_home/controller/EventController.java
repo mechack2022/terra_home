@@ -27,12 +27,10 @@ public class EventController {
 
     private final CreatorService creatorService;
 
-    private final JwtProvider jwtProvider;
 
     @PostMapping
     public ResponseEntity<ApiResponse<?>> handleCreateEvent(@RequestHeader("Authorization") String jwt, @Valid @RequestBody CreateEventRequest req) throws UsernameNotFoundException {
-        String email = jwtProvider.getEmailFromToken(jwt);
-        User user = creatorService.findUserByEmail(email);
+        User user = creatorService.findUserByJwt(jwt);
         Event event = eventServices.createEvent(user, req);
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .message(ApiConstant.IS_SUCCESS)
@@ -41,10 +39,10 @@ public class EventController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+
     @GetMapping
     public ResponseEntity<ApiResponse<?>> handleCreateEvent(@RequestHeader("Authorization") String jwt) throws UsernameNotFoundException {
-        String email = jwtProvider.getEmailFromToken(jwt);
-        User user = creatorService.findUserByEmail(email);
+        User user = creatorService.findUserByJwt(jwt);
         List<Event> events = eventServices.getEventByCreator(user);
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .message(ApiConstant.IS_SUCCESS)
@@ -53,5 +51,21 @@ public class EventController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+
+    @PutMapping("/{eventId}")
+    public ResponseEntity<ApiResponse<?>> updateEvent(@RequestHeader("Authorization") String jwt,
+                                                      @PathVariable("eventId") Long eventId,
+                                                      @Valid @RequestBody CreateEventRequest req) {
+        User user = creatorService.findUserByJwt(jwt);
+        Event updatedEvent = eventServices.updateEvent(eventId, user, req);
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .message("Event updated Successfully")
+                .status(true)
+                .data(updatedEvent)
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+
 
 }

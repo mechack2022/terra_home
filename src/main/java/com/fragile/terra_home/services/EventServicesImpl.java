@@ -6,10 +6,13 @@ import com.fragile.terra_home.dto.request.CreateEventRequest;
 
 import com.fragile.terra_home.dto.request.TicketDto;
 import com.fragile.terra_home.entities.*;
+import com.fragile.terra_home.exceptions.ResourceNotFoundException;
+import com.fragile.terra_home.exceptions.UserException;
 import com.fragile.terra_home.repository.CategoryRepository;
 import com.fragile.terra_home.repository.EventRepository;
 import com.fragile.terra_home.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventServicesImpl implements EventServices {
 
     private final CategoryRepository categoryRepository;
@@ -39,14 +43,63 @@ public class EventServicesImpl implements EventServices {
     }
 
     @Override
-    public List<Event> getAllEvent(){
+    public List<Event> getAllEvent() {
         return eventRepository.findAll();
     }
 
     @Override
-    public List<Event> getEventByCreator(User user){
+    public List<Event> getEventByCreator(User user) {
         return eventRepository.findByEventCreator(user);
     }
+
+    @Override
+    @Transactional
+    public Event updateEvent(Long eventId, User user, CreateEventRequest createEventRequest) {
+        Event foundEvent = findEventById(eventId);
+        checkEventOwner(foundEvent, user);
+        updateEventFields(foundEvent, createEventRequest);
+        return eventRepository.save(foundEvent);
+    }
+
+    @Override
+    public List<Event> filterEvent(String categoryName, String location, LocalDateTime date) {
+        try {
+            log.info("Filtering events with categoryName: {}, location: {}, date: {}", categoryName, location, date);
+
+            List<Event> filterEvent = eventRepository.filterEventsByCategoryLocationDate(categoryName, location, date);
+
+            log.info("Filtered events: {}", filterEvent);
+
+            return filterEvent;
+        } catch (Exception ex) {
+            throw new RuntimeException("Internal Server Error: " + ex.getMessage(), ex);
+        }
+    }
+
+
+    private Event findEventById(Long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with the id: " + eventId));
+    }
+
+    private void checkEventOwner(Event event, User user) {
+        if (!event.getEventCreator().equals(user)) {
+            throw new UserException("You are not allowed to update this event");
+        }
+    }
+
+    private void updateEventFields(Event event, CreateEventRequest createEventRequest) {
+        event.setName(createEventRequest.getName());
+        event.setDescription(createEventRequest.getDescription());
+        event.setEventImage("updatedImage.png");
+        event.setLocation(createEventRequest.getLocation());
+        event.setStartTime(createEventRequest.getStartTime());
+        event.setEndTime(createEventRequest.getEndTime());
+        event.setStartDate(createEventRequest.getStartDate());
+        event.setEndDate(createEventRequest.getEndDate());
+        event.setUpdatedAt(LocalDateTime.now());
+    }
+
 
     private Event createEventEntity(User user, CreateEventRequest createEventRequest) {
         EventCategory category = categoryRepository.findByCategoryName(createEventRequest.getCategoryName())

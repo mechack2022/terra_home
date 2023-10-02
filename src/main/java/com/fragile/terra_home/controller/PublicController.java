@@ -7,10 +7,10 @@ import com.fragile.terra_home.services.EventServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -38,4 +38,37 @@ public class PublicController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @PostMapping("/events")
+    public ResponseEntity<ApiResponse<?>> filterEventsByCategoryOrLocationOrDate(
+            @RequestParam(value = "category_name", required = false) String categoryName,
+            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "date", required = false) String dateString) {
+        try {
+            LocalDateTime date = null;
+
+            if (dateString != null) {
+                date = LocalDateTime.parse(dateString);
+            }
+
+            List<Event> eventList = eventServices.filterEvent(categoryName, location, date);
+            ApiResponse<?> apiResponse = ApiResponse
+                    .builder()
+                    .message(ApiConstant.IS_SUCCESS)
+                    .data(eventList)
+                    .status(true)
+                    .build();
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        } catch (DateTimeParseException ex) {
+            // Handle invalid date format here
+            ApiResponse<?> errorResponse = ApiResponse
+                    .builder()
+                    .message("Invalid date format")
+                    .status(false)
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 }

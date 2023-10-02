@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
+//@ToString
 @Table(name="goers")
 public class Goer {
 

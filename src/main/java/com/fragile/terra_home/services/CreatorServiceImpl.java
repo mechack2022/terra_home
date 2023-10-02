@@ -1,5 +1,6 @@
 package com.fragile.terra_home.services;
 
+import com.fragile.terra_home.config.JwtProvider;
 import com.fragile.terra_home.entities.User;
 import com.fragile.terra_home.exceptions.UserException;
 import com.fragile.terra_home.repository.UserRepository;
@@ -13,8 +14,16 @@ import java.util.Optional;
 public class CreatorServiceImpl implements CreatorService {
 
     private final UserRepository userRepository;
+
+    private final JwtProvider jwtProvider;
     @Override
     public User getCreatorProfile(String email) {
+        return findUserByEmail(email);
+    }
+
+    @Override
+    public User findUserByJwt(String jwt) {
+        String email = jwtProvider.getEmailFromToken(jwt);
         return findUserByEmail(email);
     }
 
