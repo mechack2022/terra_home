@@ -4,6 +4,7 @@ import com.fragile.terra_home.dto.request.AccountRequestDto;
 import com.fragile.terra_home.dto.response.BeneficiaryAccountResponseDto;
 import com.fragile.terra_home.entities.BeneficiaryAccount;
 import com.fragile.terra_home.entities.User;
+import com.fragile.terra_home.exceptions.ResourceNotFoundException;
 import com.fragile.terra_home.exceptions.UserException;
 import com.fragile.terra_home.repository.AccountRepository;
 import com.fragile.terra_home.repository.UserRepository;
@@ -47,4 +48,40 @@ public class AccountServiceImpl implements AccountService {
             throw new RuntimeException("Internal Server Error: " + ex.getMessage(), ex);
         }
     }
+
+    @Override
+    public BeneficiaryAccount getAccount(User creator) {
+        try {
+            User user = creatorService.findUserByEmail(creator.getEmail());
+            if (isPaymentAccountCreated(user.getCreatorAccount())) {
+                return user.getCreatorAccount();
+            }
+            throw new ResourceNotFoundException("No payment Account created for this user, create a new payment account");
+        } catch (Exception ex) {
+            throw new RuntimeException("Internal Server Error: " + ex.getMessage(), ex);
+        }
+
+    }
+
+    @Override
+    public BeneficiaryAccount updateAccount(User creator, AccountRequestDto requestDto) {
+        User user = creatorService.findUserByEmail(creator.getEmail());
+        BeneficiaryAccount acct = user.getCreatorAccount();
+        if (isPaymentAccountCreated(acct)) {
+            acct.setBankName(requestDto.getBankName());
+            acct.setAccountHolderName(requestDto.getAccountHolderName());
+            acct.setBankName(requestDto.getBankName());
+            return accountRepository.save(acct);
+        }
+        throw new ResourceNotFoundException("No payment Account created for this user, create a new payment account");
+    }
+
+    private Boolean isPaymentAccountCreated(BeneficiaryAccount acct) {
+        if (Objects.isNull(acct)) {
+            throw new ResourceNotFoundException("No payment Account created for this user, create a new payment account");
+        }
+        return true;
+
+    }
+
 }

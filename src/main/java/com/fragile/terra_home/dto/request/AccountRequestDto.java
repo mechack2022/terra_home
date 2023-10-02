@@ -10,7 +10,6 @@ import org.aspectj.bridge.IMessage;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountRequestDto {
-
     @NotBlank(message="Account full name is require")
     private String accountHolderName;
     @NotBlank(message="Bank name is required")

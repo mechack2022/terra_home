@@ -1,5 +1,6 @@
 package com.fragile.terra_home.controller;
 
+import com.fragile.terra_home.constants.ApiConstant;
 import com.fragile.terra_home.dto.request.AccountRequestDto;
 import com.fragile.terra_home.dto.response.ApiResponse;
 import com.fragile.terra_home.dto.response.BeneficiaryAccountResponseDto;
@@ -32,5 +33,29 @@ public class AccountController  {
                 .data(bacct)
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<?>>  viewAccount(@RequestHeader("Authorization") String jwt){
+        User user = creatorService.findUserByJwt(jwt);
+        BeneficiaryAccount acct = accountService.getAccount(user);
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .message(ApiConstant.IS_SUCCESS)
+                .status(true)
+                .data(acct)
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse<?>>  updateAccount(@RequestHeader("Authorization") String jwt, @Valid @RequestBody AccountRequestDto requestDto){
+        User user = creatorService.findUserByJwt(jwt);
+        BeneficiaryAccount acct = accountService.updateAccount(user, requestDto);
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .message("Account successfully updated")
+                .status(true)
+                .data(acct)
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
