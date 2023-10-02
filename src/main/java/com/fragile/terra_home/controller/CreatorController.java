@@ -35,7 +35,6 @@ public class CreatorController {
                 // Handle the case where the profile is not found
                 throw new UserException("User profile not found.");
             }
-
             ApiResponse<?> apiResponse = ApiResponse.builder()
                     .message(ApiConstant.IS_SUCCESS)
                     .status(true)

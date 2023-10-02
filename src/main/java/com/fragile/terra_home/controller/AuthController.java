@@ -3,11 +3,13 @@ package com.fragile.terra_home.controller;
 import com.fragile.terra_home.config.JwtProvider;
 import com.fragile.terra_home.constants.UserRole;
 import com.fragile.terra_home.dto.request.LoginRequest;
+import com.fragile.terra_home.dto.request.SignupRequest;
 import com.fragile.terra_home.dto.response.AuthResponse;
 import com.fragile.terra_home.entities.User;
 import com.fragile.terra_home.exceptions.UserException;
 import com.fragile.terra_home.repository.UserRepository;
 import com.fragile.terra_home.services.CustomUserServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -39,7 +41,7 @@ public class AuthController {
 //    private final CartService cartService;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> createUserHandler(@RequestBody User user) {
+    public ResponseEntity<AuthResponse> createUserHandler(@Valid @RequestBody SignupRequest user) {
         try {
             String firstName = user.getFirstName();
             String lastName = user.getLastName();

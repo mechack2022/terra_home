@@ -1,5 +1,6 @@
 package com.fragile.terra_home.entities;
 
+import com.fragile.terra_home.constants.TicketType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name="tickets")
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,13 +24,13 @@ public class Ticket {
     @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
-    @ElementCollection
-    @Column(name = "ticketClass")
-    private Set<TicketClass> ticketClassList = new HashSet<>();
+    private Integer availableTicket;
+    private Double ticketPrice;
+    @Enumerated(EnumType.STRING)
+    private TicketType ticketType;
     @ManyToOne
     @JoinColumn(name = "goer_id")
     private Goer goer;
-
 
 
 }
