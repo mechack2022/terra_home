@@ -49,4 +49,6 @@ public class Event {
     private Set<Ticket> tickets = new HashSet<>();
 
     private LocalDateTime createAt;
+
+    private LocalDateTime updatedAt;
 }

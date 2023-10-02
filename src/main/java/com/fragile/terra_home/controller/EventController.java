@@ -41,6 +41,7 @@ public class EventController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+
     @GetMapping
     public ResponseEntity<ApiResponse<?>> handleCreateEvent(@RequestHeader("Authorization") String jwt) throws UsernameNotFoundException {
         String email = jwtProvider.getEmailFromToken(jwt);
@@ -52,6 +53,26 @@ public class EventController {
                 .data(events)
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{eventId}")
+    public ResponseEntity<ApiResponse<?>> updateEvent(@RequestHeader("Authorization") String jwt,
+                                                      @PathVariable("eventId") Long eventId,
+                                                      @Valid @RequestBody CreateEventRequest req) {
+        User user = findByJwt(jwt);
+        Event updatedEvent = eventServices.updateEvent(eventId, user, req);
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .message("Event updated Successfully")
+                .status(true)
+                .data(updatedEvent)
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+
+    private User findByJwt(String jwt) {
+        String email = jwtProvider.getEmailFromToken(jwt);
+        return creatorService.findUserByEmail(email);
     }
 
 }
