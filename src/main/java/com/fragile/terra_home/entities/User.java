@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name="users")
 public class User {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -38,7 +39,7 @@ public class User {
     private List<Event> eventList = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="accountId")
+    @JoinColumn(name="account_Id")
     private BeneficiaryAccount creatorAccount;
 
     private LocalDateTime createdAt;

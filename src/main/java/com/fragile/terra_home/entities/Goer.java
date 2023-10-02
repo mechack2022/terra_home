@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name="goers")
 public class Goer {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,8 +27,7 @@ public class Goer {
     private String email;
     private UserRole role;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true )
-    @JoinColumn(name="ticket_id")
+    @OneToMany(mappedBy = "goer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ticket> ticketList = new ArrayList<>();
 
     private LocalDateTime createdAt;
