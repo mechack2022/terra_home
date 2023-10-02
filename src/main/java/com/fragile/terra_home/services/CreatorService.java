@@ -6,5 +6,7 @@ public interface CreatorService {
 
     User getCreatorProfile(String email);
 
+    User findUserByJwt(String jwt);
+
     User findUserByEmail(String email);
 }
