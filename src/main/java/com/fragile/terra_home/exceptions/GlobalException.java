@@ -22,13 +22,19 @@ public class GlobalException {
 
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ErrorDetail> handleUserException(UserException userEx, WebRequest req) {
-        ErrorDetail errorDetail = new ErrorDetail(userEx.getMessage(), req.getDescription(false), LocalDateTime.now());
+        ErrorDetail errorDetail = new ErrorDetail(userEx.getMessage(),  req.getDescription(false), userEx.getStatus(), LocalDateTime.now());
         return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorDetail> handleResouresNotFoundException(ResourceNotFoundException userEx, WebRequest req) {
-        ErrorDetail errorDetail = new ErrorDetail(userEx.getMessage(), req.getDescription(false), LocalDateTime.now());
+        ErrorDetail errorDetail = new ErrorDetail(userEx.getMessage(), req.getDescription(false), userEx.getStatus(),  LocalDateTime.now());
+        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PayStackExcption.class)
+    public ResponseEntity<ErrorDetail> handlePayStackException(PayStackExcption ex, WebRequest req) {
+        ErrorDetail errorDetail = new ErrorDetail(ex.getMessage(),  req.getDescription(false), ex.getStatus(), LocalDateTime.now());
         return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
     }
 
