@@ -15,7 +15,7 @@ import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
-//@ToString
+@ToString
 @Getter
 @Setter
 @Builder
@@ -46,6 +46,7 @@ public class Event {
     @JoinColumn(name = "ticket_id")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @ToString.Exclude
     private Set<Ticket> tickets = new HashSet<>();
 
     private LocalDateTime createAt;

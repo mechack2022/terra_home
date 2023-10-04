@@ -28,9 +28,10 @@ public class Ticket {
     private Double ticketPrice;
     @Enumerated(EnumType.STRING)
     private TicketType ticketType;
-    @ManyToOne
+    private Boolean isSold;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "goer_id")
-    private Goer goer;
+    private List<Goer> goers = new ArrayList<>();
 
 
 }

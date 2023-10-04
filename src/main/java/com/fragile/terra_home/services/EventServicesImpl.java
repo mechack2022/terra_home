@@ -48,7 +48,7 @@ public class EventServicesImpl implements EventServices {
     }
 
     @Override
-    public List<Event> getEventByCreator(User user) {
+    public List<Event> getEventsByCreator(User user) {
         return eventRepository.findByEventCreator(user);
     }
 
@@ -134,6 +134,7 @@ public class EventServicesImpl implements EventServices {
             newTicket.setAvailableTicket(ticketDto.getAvailableTicket());
             newTicket.setTicketPrice(ticketDto.getTicketPrice());
             newTicket.setTicketType(ticketDto.getTicketType());
+            newTicket.setIsSold(false);
             ticketList.add(newTicket);
         }
 

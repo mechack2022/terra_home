@@ -1,6 +1,7 @@
-package com.fragile.terra_home.entities;
+package com.fragile.terra_home.dto.request;
 
 import com.fragile.terra_home.constants.UserRole;
+import com.fragile.terra_home.entities.Ticket;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,29 +9,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
 @Setter
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-//@ToString
-@Table(name="goers")
-public class Goer {
-
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Id
-    private Long id;
-
+public class SaveTicketRequestDto {
     private String firstName;
-
     private String email;
-    private UserRole role;
-
-    @ManyToOne
-    @JoinColumn(name="ticket_id")
-    private Ticket ticket;
-
+    private Long eventId;
+    private List<Ticket> ticketList;
     private LocalDateTime createdAt;
 
 

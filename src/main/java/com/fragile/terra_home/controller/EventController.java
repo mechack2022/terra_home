@@ -43,7 +43,7 @@ public class EventController {
     @GetMapping
     public ResponseEntity<ApiResponse<?>> handleCreateEvent(@RequestHeader("Authorization") String jwt) throws UsernameNotFoundException {
         User user = creatorService.findUserByJwt(jwt);
-        List<Event> events = eventServices.getEventByCreator(user);
+        List<Event> events = eventServices.getEventsByCreator(user);
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .message(ApiConstant.IS_SUCCESS)
                 .status(true)

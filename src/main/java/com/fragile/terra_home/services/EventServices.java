@@ -13,7 +13,8 @@ public interface EventServices {
 
     List<Event> getAllEvent();
 
-    List<Event> getEventByCreator(User user);
+    List<Event> getEventsByCreator(User user);
+
 
     Event updateEvent(Long eventId, User user, CreateEventRequest createEventRequest);
 

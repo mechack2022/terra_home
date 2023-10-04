@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
 @NoArgsConstructor
 @ToString
 @Getter
