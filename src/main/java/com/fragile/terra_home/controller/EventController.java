@@ -11,6 +11,7 @@ import com.fragile.terra_home.services.EventServices;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/events")
+@Slf4j
 public class EventController {
 
     private final EventServices eventServices;
@@ -41,7 +43,7 @@ public class EventController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> handleCreateEvent(@RequestHeader("Authorization") String jwt) throws UsernameNotFoundException {
+    public ResponseEntity<ApiResponse<?>> getEventsByCreator(@RequestHeader("Authorization") String jwt) throws UsernameNotFoundException {
         User user = creatorService.findUserByJwt(jwt);
         List<Event> events = eventServices.getEventsByCreator(user);
         ApiResponse<?> apiResponse = ApiResponse.builder()
@@ -56,6 +58,7 @@ public class EventController {
     public ResponseEntity<ApiResponse<?>> updateEvent(@RequestHeader("Authorization") String jwt,
                                                       @PathVariable("eventId") Long eventId,
                                                       @Valid @RequestBody CreateEventRequest req) {
+        log.info("Inside update controller");
         User user = creatorService.findUserByJwt(jwt);
         Event updatedEvent = eventServices.updateEvent(eventId, user, req);
         ApiResponse<?> apiResponse = ApiResponse.builder()
@@ -63,9 +66,18 @@ public class EventController {
                 .status(true)
                 .data(updatedEvent)
                 .build();
+        log.info("ApiResponse created: {}", apiResponse);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-
-
+//    @PutMapping("/love/{eventId}")
+//    public ResponseEntity<String> updateEvent(@RequestHeader("Authorization") String jwt, @PathVariable("eventId") Long eventId,
+//                                              @Valid @RequestBody CreateEventRequest req) {
+//        log.info("Inside update texting controller");
+//        User user = creatorService.findUserByJwt(jwt);
+//        Event updatedEvent = eventServices.updateEvent(eventId, user, req);
+//        log.info("updated event inside controller : {} ", updatedEvent);
+//        return new ResponseEntity<>("love texting", HttpStatus.CREATED);
+//
+//    }
 }

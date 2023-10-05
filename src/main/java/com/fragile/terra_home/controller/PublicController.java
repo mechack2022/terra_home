@@ -3,6 +3,7 @@ package com.fragile.terra_home.controller;
 import com.fragile.terra_home.constants.ApiConstant;
 import com.fragile.terra_home.dto.response.ApiResponse;
 import com.fragile.terra_home.entities.Event;
+import com.fragile.terra_home.exceptions.ResourceNotFoundException;
 import com.fragile.terra_home.services.EventServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -69,6 +70,19 @@ public class PublicController {
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("events/{eventId}")
+    public ResponseEntity<ApiResponse<?>> getEventById(@PathVariable("eventId") Long eventId)  {
+        Event event = eventServices.getEventById(eventId);
+        ApiResponse<?> apiResponse = ApiResponse
+                .builder()
+                .message(ApiConstant.IS_SUCCESS)
+                .data(event)
+                .status(true)
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 
 
 

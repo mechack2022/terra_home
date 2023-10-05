@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +29,13 @@ public class TicketServiceImpl implements TicketServices {
     private final CreatorService creatorService;
 
     private final ModelMapper modelMapper;
+
     @Override
     public List<TicketResponseDto> findCreatorTicketsByEventId(User user, Long eventId) {
         try {
+              if(eventRepository.findById(eventId).isEmpty()) {
+                  throw  new ResourceNotFoundException("Event not found with ID: " + eventId, HttpStatus.BAD_REQUEST);
+              }
             // Find the creator by email
             User creator = creatorService.findUserByEmail(user.getEmail());
             // Handle User Not Found
@@ -48,21 +53,16 @@ public class TicketServiceImpl implements TicketServices {
             }
             // Get the tickets associated with the found event
             Event foundEvent = eventOptional.get();
-            List<Ticket> foundEventTickets =  ticketRepository.findByEvent(foundEvent);
+            List<Ticket> foundEventTickets = ticketRepository.findByEvent(foundEvent);
             log.info("found Event tickets: {}", foundEventTickets);
             return foundEventTickets.stream().map(ticket -> modelMapper.map(ticket, TicketResponseDto.class)).collect(Collectors.toList());
-        } catch (UsernameNotFoundException e) {
-            // Handle User Not Found Exception
-            log.error("User not found: " + e.getMessage(), e);
-            throw e;
         } catch (ResourceNotFoundException e) {
             // Handle Event Not Found Exception
-            log.error("Event not found: " + e.getMessage(), e);
-            throw e;
-        } catch (DataAccessException e) {
-            // Handle Database Error
-            log.error("Database error: " + e.getMessage(), e);
-            throw new DatabaseException("An error occurred while accessing the database.");
+            throw new ResourceNotFoundException("Event not found: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+//            throw e;
+        } catch (UsernameNotFoundException e) {
+            // Handle User Not Found Exception
+            throw new UsernameNotFoundException("User not found with email: " + e.getMessage(), e);
         } catch (Exception e) {
             // Handle other exceptions (e.g., network errors)
             log.error("An unexpected error occurred: " + e.getMessage(), e);

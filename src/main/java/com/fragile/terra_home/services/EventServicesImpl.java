@@ -13,11 +13,15 @@ import com.fragile.terra_home.repository.EventRepository;
 import com.fragile.terra_home.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +32,8 @@ public class EventServicesImpl implements EventServices {
     private final EventRepository eventRepository;
     private final TicketRepository ticketRepository;
     private final TicketServices ticketServices;
+
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
@@ -52,24 +58,44 @@ public class EventServicesImpl implements EventServices {
         return eventRepository.findByEventCreator(user);
     }
 
+
     @Override
-    @Transactional
+//    @Transactional
     public Event updateEvent(Long eventId, User user, CreateEventRequest createEventRequest) {
-        Event foundEvent = findEventById(eventId);
-        checkEventOwner(foundEvent, user);
-        updateEventFields(foundEvent, createEventRequest);
-        return eventRepository.save(foundEvent);
+        try {
+            log.info("Inside update implementation");
+            Event foundEvent = getEventById(eventId);
+            log.info("event found by Id : {} ", foundEvent.getEventCreator());
+            // check the current user for the creator of event
+            checkEventOwner(foundEvent, user);
+            Event e = updateEventFields(foundEvent, createEventRequest);
+            return eventRepository.save(e);
+        } catch (Exception ex) {
+            throw new RuntimeException("Internal Server error: " + ex.getMessage(), ex);
+        }
+
+    }
+
+    @Override
+    public Event getEventById(Long eventId) {
+        try {
+            Optional<Event> event = eventRepository.findById(eventId);
+            if (event.isPresent()) {
+                return event.get();
+            }
+            throw new ResourceNotFoundException("Event with this id not found : " + eventId, HttpStatus.BAD_REQUEST);
+        } catch (Exception ex) {
+            throw new RuntimeException("Internal Server error: " + ex.getMessage(), ex);
+        }
+
     }
 
     @Override
     public List<Event> filterEvent(String categoryName, String location, LocalDateTime date) {
         try {
             log.info("Filtering events with categoryName: {}, location: {}, date: {}", categoryName, location, date);
-
             List<Event> filterEvent = eventRepository.filterEventsByCategoryLocationDate(categoryName, location, date);
-
             log.info("Filtered events: {}", filterEvent);
-
             return filterEvent;
         } catch (Exception ex) {
             throw new RuntimeException("Internal Server Error: " + ex.getMessage(), ex);
@@ -88,7 +114,7 @@ public class EventServicesImpl implements EventServices {
         }
     }
 
-    private void updateEventFields(Event event, CreateEventRequest createEventRequest) {
+    private Event updateEventFields(Event event, CreateEventRequest createEventRequest) {
         event.setName(createEventRequest.getName());
         event.setDescription(createEventRequest.getDescription());
         event.setEventImage("updatedImage.png");
@@ -98,6 +124,14 @@ public class EventServicesImpl implements EventServices {
         event.setStartDate(createEventRequest.getStartDate());
         event.setEndDate(createEventRequest.getEndDate());
         event.setUpdatedAt(LocalDateTime.now());
+
+        Set<Ticket> ticketSet = createEventRequest.getTickets()
+                .stream()
+                .map(t -> modelMapper.map(t, Ticket.class))
+                .collect(Collectors.toSet());
+
+        event.setTickets(ticketSet);
+        return event;
     }
 
 

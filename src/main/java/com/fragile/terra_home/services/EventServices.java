@@ -18,5 +18,7 @@ public interface EventServices {
 
     Event updateEvent(Long eventId, User user, CreateEventRequest createEventRequest);
 
+    Event getEventById(Long eventId);
+
     List<Event>  filterEvent(String categoryName, String location, LocalDateTime date);
 }

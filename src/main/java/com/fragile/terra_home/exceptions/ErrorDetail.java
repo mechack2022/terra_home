@@ -22,6 +22,8 @@ public class ErrorDetail {
     public ErrorDetail(String message, String description, LocalDateTime now) {
     }
 
+
     public ErrorDetail(String message, String description, HttpStatus status, LocalDateTime now) {
     }
+
 }
