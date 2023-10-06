@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -59,22 +58,99 @@ public class EventServicesImpl implements EventServices {
     }
 
 
-    @Override
+//    @Override
 //    @Transactional
-    public Event updateEvent(Long eventId, User user, CreateEventRequest createEventRequest) {
+//    public Event updateEvent(Long eventId, User user, CreateEventRequest createEventRequest) {
+//        try {
+//            log.info("Inside update implementation");
+//            Event foundEvent = getEventById(eventId);
+//            log.info("event found by Id : {} ", foundEvent.getEventCreator());
+//            // check the current user for the creator of event
+//            checkEventOwner(foundEvent, user);
+//            Event e = updateEventFields(foundEvent, createEventRequest);
+//            return eventRepository.save(e);
+//        } catch (Exception ex) {
+//            throw new RuntimeException("Internal Server error: " + ex.getMessage(), ex);
+//        }
+//    }
+
+    @Override
+    @Transactional
+    public Event updateEvent(Long eventId, User user, Event createEventRequest) {
         try {
-            log.info("Inside update implementation");
-            Event foundEvent = getEventById(eventId);
-            log.info("event found by Id : {} ", foundEvent.getEventCreator());
-            // check the current user for the creator of event
-            checkEventOwner(foundEvent, user);
-            Event e = updateEventFields(foundEvent, createEventRequest);
-            return eventRepository.save(e);
+            Event event = getEventById(eventId);
+            Set<Ticket> existingTickets = event.getTickets();
+            log.info("event found by Id : {} ", event.getEventCreator());
+            // Check the current user for the creator of the event
+            checkEventOwner(event, user);
+            // Update Event fields
+            event.setName(createEventRequest.getName());
+            event.setDescription(createEventRequest.getDescription());
+            event.setLocation(createEventRequest.getLocation());
+            event.setEventStatus(createEventRequest.getEventStatus());
+            event.setEventImage(createEventRequest.getEventImage());
+            event.setStartDate(createEventRequest.getStartDate());
+            event.setEndDate(createEventRequest.getEndDate());
+            event.setStartTime(createEventRequest.getStartTime());
+            event.setEndTime(createEventRequest.getEndTime());
+
+            // Update Ticket fields or remove orphaned Tickets
+            for (Iterator<Ticket> iterator = existingTickets.iterator(); iterator.hasNext();) {
+                Ticket ticket = iterator.next();
+                if (!createEventRequest.getTickets().contains(ticket)) {
+                    // Remove orphaned Ticket from the database
+                    iterator.remove();
+                    ticketRepository.delete(ticket);
+                } else {
+                    // Update Ticket fields
+                    updateTicketFields(ticket, createEventRequest.getTickets().stream()
+                            .map(t -> modelMapper.map(t, Ticket.class))
+                            .collect(Collectors.toSet()));
+                }
+            }
+            event.setTickets(existingTickets); // Set the updated collection
+            event.setUpdatedAt(LocalDateTime.now());
+            // Save the updated Event
+            return eventRepository.save(event);
         } catch (Exception ex) {
             throw new RuntimeException("Internal Server error: " + ex.getMessage(), ex);
         }
-
     }
+
+
+    private void updateTicketFields(Ticket existingTicket, Set<Ticket> newTickets) {
+        // Find the matching new Ticket based on some identifier (e.g., id or other unique property)
+        Optional<Ticket> matchingNewTicket = newTickets.stream()
+                .filter(newTicket -> Objects.equals(newTicket.getId(), existingTicket.getId()))
+                .findFirst();
+
+        if (matchingNewTicket.isPresent()) {
+            Ticket newTicket = matchingNewTicket.get();
+            // Update the fields of the existing Ticket with the new values
+            existingTicket.setAvailableTicket(newTicket.getAvailableTicket());
+            existingTicket.setTicketPrice(newTicket.getTicketPrice());
+            existingTicket.setTicketType(newTicket.getTicketType());
+            existingTicket.setIsSold(newTicket.getIsSold());
+
+            ticketRepository.save(existingTicket);
+        }
+    }
+
+    @Override
+    public String deletedEvent(User user, Long eventId){
+        try {
+            Optional<Event> event = eventRepository.findById(eventId);
+            if (event.isPresent()) {
+                 checkEventOwner(event.get(), user);
+                 eventRepository.deleteById(eventId);
+                 return "Event deleted successfully";
+            }
+            throw new ResourceNotFoundException("Event with this id not found : " + eventId, HttpStatus.BAD_REQUEST);
+        } catch (Exception ex) {
+            throw new RuntimeException("Internal Server error: " + ex.getMessage(), ex);
+        }
+    }
+
 
     @Override
     public Event getEventById(Long eventId) {
@@ -102,7 +178,6 @@ public class EventServicesImpl implements EventServices {
         }
     }
 
-
     private Event findEventById(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with the id: " + eventId));
@@ -114,25 +189,6 @@ public class EventServicesImpl implements EventServices {
         }
     }
 
-    private Event updateEventFields(Event event, CreateEventRequest createEventRequest) {
-        event.setName(createEventRequest.getName());
-        event.setDescription(createEventRequest.getDescription());
-        event.setEventImage("updatedImage.png");
-        event.setLocation(createEventRequest.getLocation());
-        event.setStartTime(createEventRequest.getStartTime());
-        event.setEndTime(createEventRequest.getEndTime());
-        event.setStartDate(createEventRequest.getStartDate());
-        event.setEndDate(createEventRequest.getEndDate());
-        event.setUpdatedAt(LocalDateTime.now());
-
-        Set<Ticket> ticketSet = createEventRequest.getTickets()
-                .stream()
-                .map(t -> modelMapper.map(t, Ticket.class))
-                .collect(Collectors.toSet());
-
-        event.setTickets(ticketSet);
-        return event;
-    }
 
 
     private Event createEventEntity(User user, CreateEventRequest createEventRequest) {
