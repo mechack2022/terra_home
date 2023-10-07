@@ -1,6 +1,5 @@
 package com.fragile.terra_home.entities;
 
-import com.fragile.terra_home.constants.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,28 +8,28 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
 @Setter
+@Entity
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-//@ToString
-@Table(name="goers")
-public class Goer {
+@Table(name="tickets_bought")
+public class TicketBought {
 
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String firstName;
     private String email;
-    private UserRole role;
-    private BigDecimal ticketTotalAmount;
     private Integer noOfTickets;
+    private BigDecimal ticketTotalAmount;
     @ManyToOne
-    @JoinColumn(name="ticket_id")
-    private Ticket ticket;
-
+    private Ticket ticketId;
+    @ManyToOne
+    private Goer goer;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<PaymentInfo> ticketPaymentInfo = new ArrayList<>();
     private LocalDateTime createdAt;
 
 
