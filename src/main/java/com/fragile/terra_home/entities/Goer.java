@@ -1,5 +1,6 @@
 package com.fragile.terra_home.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fragile.terra_home.constants.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,8 +31,11 @@ public class Goer {
     @ManyToOne
     @JoinColumn(name="ticket_id")
     private Ticket ticket;
-
+    private Boolean isPaid = false;
     private LocalDateTime createdAt;
+    @OneToMany(mappedBy = "goer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<GoerPaymentLog> paymentLogId = new ArrayList<>();
 
 
 }
