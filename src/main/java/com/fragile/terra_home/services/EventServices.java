@@ -16,7 +16,9 @@ public interface EventServices {
     List<Event> getEventsByCreator(User user);
 
 
-    Event updateEvent(Long eventId, User user, CreateEventRequest createEventRequest);
+    Event updateEvent(Long eventId, User user, Event createEventRequest);
+
+    String deletedEvent(User user, Long eventId);
 
     Event getEventById(Long eventId);
 

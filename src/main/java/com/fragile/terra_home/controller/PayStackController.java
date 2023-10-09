@@ -15,11 +15,16 @@ import org.springframework.web.bind.annotation.*;
 public class PayStackController {
     private final PaystackServices paystackServices;
 
-    @PostMapping("/initialize-payment")
-    public ResponseEntity<InitializePaymentResponse> initializePayment(@Valid @RequestBody InitializePaymentDto req) {
-        InitializePaymentResponse res = paystackServices.initializePayment(req);
-        return new ResponseEntity<>(res, HttpStatus.CREATED);
+    @PostMapping("/initialize-payment/{goerId}")
+    public ResponseEntity<?> initializePayment(@PathVariable("goerId") Long goerId) {
+        var res = paystackServices.initializePayment(goerId);
+        return new ResponseEntity<>(res.getBody(), HttpStatus.CREATED);
+    }
 
+    @PostMapping("/verify-payment/{goerId}")
+    public ResponseEntity<?> initializePayment(@PathVariable("goerId") Long goerId, @RequestParam(value = "reference") String reference) {
+        var res = paystackServices.verifyPayment(goerId, reference);
+        return new ResponseEntity<>(res.getBody(), HttpStatus.CREATED);
     }
 
 }

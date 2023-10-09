@@ -57,7 +57,7 @@ public class EventController {
     @PutMapping("/{eventId}")
     public ResponseEntity<ApiResponse<?>> updateEvent(@RequestHeader("Authorization") String jwt,
                                                       @PathVariable("eventId") Long eventId,
-                                                      @Valid @RequestBody CreateEventRequest req) {
+                                                      @Valid @RequestBody Event req) {
         log.info("Inside update controller");
         User user = creatorService.findUserByJwt(jwt);
         Event updatedEvent = eventServices.updateEvent(eventId, user, req);
@@ -70,14 +70,18 @@ public class EventController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-//    @PutMapping("/love/{eventId}")
-//    public ResponseEntity<String> updateEvent(@RequestHeader("Authorization") String jwt, @PathVariable("eventId") Long eventId,
-//                                              @Valid @RequestBody CreateEventRequest req) {
-//        log.info("Inside update texting controller");
-//        User user = creatorService.findUserByJwt(jwt);
-//        Event updatedEvent = eventServices.updateEvent(eventId, user, req);
-//        log.info("updated event inside controller : {} ", updatedEvent);
-//        return new ResponseEntity<>("love texting", HttpStatus.CREATED);
-//
-//    }
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<ApiResponse<?>> deleteEvent(@RequestHeader("Authorization") String jwt, @PathVariable("eventId") Long eventId) {
+
+        User user = creatorService.findUserByJwt(jwt);
+        String res = eventServices.deletedEvent(user, eventId);
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .message(ApiConstant.IS_SUCCESS)
+                .status(true)
+                .data(res)
+                .build();
+        log.info("ApiResponse created: {}", apiResponse);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
 }

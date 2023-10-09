@@ -19,11 +19,18 @@ public class ErrorDetail {
     private HttpStatus status;
     private LocalDateTime timeStamp;
 
-    public ErrorDetail(String message, String description, LocalDateTime now) {
+    public ErrorDetail(String error, String details, LocalDateTime timeStamp) {
+        this.error = error;
+        this.details = details;
+        this.timeStamp = timeStamp;
     }
 
 
-    public ErrorDetail(String message, String description, HttpStatus status, LocalDateTime now) {
+    public ErrorDetail(String error, String details, HttpStatus status, LocalDateTime timeStamp) {
+        this.error = error;
+        this.details = details;
+        this.status = status;
+        this.timeStamp = timeStamp;
     }
 
 }
