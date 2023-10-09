@@ -3,7 +3,6 @@ package com.fragile.terra_home.entities;
 import com.fragile.terra_home.constants.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 @Entity
@@ -12,8 +11,8 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="goer_payment_log")
-public class GoerPaymentLog {
+@Table(name="payment_log")
+public class PaymentLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
