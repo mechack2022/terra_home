@@ -5,17 +5,18 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+
 @Entity
-@Getter
 @Setter
-@Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="payment_log")
-public class PaymentLog {
+@Builder
+public class GoerPayLog {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
     @Column(name = "amount")
     private BigDecimal amount;
 
