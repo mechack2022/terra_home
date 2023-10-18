@@ -21,10 +21,10 @@ public class PayStackController {
         return new ResponseEntity<>(res.getBody(), HttpStatus.CREATED);
     }
 
-    @PostMapping("/verify-payment/{goerId}")
-    public ResponseEntity<?> initializePayment(@PathVariable("goerId") Long goerId, @RequestParam(value = "reference") String reference) {
+    @PostMapping("/verify-payment/{goerId}/{reference}")
+    public ResponseEntity<?> initializePayment(@PathVariable("goerId") Long goerId, @PathVariable("reference") String reference) {
         var res = paystackServices.verifyPayment(goerId, reference);
-        return new ResponseEntity<>(res.getBody(), HttpStatus.CREATED);
+        return new ResponseEntity<>( res, HttpStatus.CREATED);
     }
 
 }

@@ -35,7 +35,7 @@ public class Goer {
     private LocalDateTime createdAt;
     @OneToMany(mappedBy = "goer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<PaymentLog> paymentLogId = new ArrayList<>();
+    private List<GoerPayLog> paymentLogId = new ArrayList<>();
 
 
 }
