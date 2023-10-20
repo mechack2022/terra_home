@@ -33,24 +33,12 @@ import static com.fragile.terra_home.constants.ApiConstant.PAYSTACK_VERIFY;
 @Slf4j
 public class PaystackServiceImplementation implements PaystackServices {
 
-    private final RestTemplate restTemplate;
-
     private final GoerRepository goerRepository;
 
     private final ApiCallServices apiCallServices;
 
     private final GoerPaymentLogRepository goerPaymentLogRepository;
-    @Value("${paystack_secret_key}")
-    private String payStackSecretKey;
 
-
-    private HttpHeaders getHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(payStackSecretKey);
-        return headers;
-
-    }
 
     @Override
     public ResponseEntity<?> initializePayment(Long goerId) {
@@ -59,6 +47,7 @@ public class PaystackServiceImplementation implements PaystackServices {
             if (goer.isEmpty()) {
                 return new ResponseEntity<>(ApiResponse.builder().message("Goer not found with id :" + goerId).status(false).data(null).build(), HttpStatus.BAD_REQUEST);
             }
+             // is payment already initiated
 
              Map<String, String> req = new HashMap<>();
              req.put("amount", goer.get().getTicketTotalAmount().toString());
