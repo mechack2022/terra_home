@@ -54,6 +54,8 @@ public class Event {
     private BigDecimal totalTicketSalePrice = BigDecimal.ZERO;
 
     private BigDecimal eventCharges = BigDecimal.ZERO;
+
+    private BigDecimal withdrawalAmount = BigDecimal.ZERO;
     private LocalDateTime createAt;
 
     private LocalDateTime updatedAt;

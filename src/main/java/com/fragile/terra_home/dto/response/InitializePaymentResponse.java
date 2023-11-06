@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class InitializePaymentResponse {
 
     private boolean status;
@@ -21,6 +22,7 @@ public class InitializePaymentResponse {
     @Component
     @Getter
     @Setter
+    @ToString
     public static class Data {
         private String authorization_url;
         private String access_code;

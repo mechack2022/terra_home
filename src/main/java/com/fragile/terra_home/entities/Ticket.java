@@ -31,6 +31,7 @@ public class Ticket {
     private Boolean isSold;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "goer_id")
+    @ToString.Exclude
     private List<Goer> goers = new ArrayList<>();
 
 

@@ -37,6 +37,7 @@ public class ApiCallServices {
     public ResponseEntity<InitializePaymentResponse> initiateTransaction(String url, Map<String, String> map) {
         HttpEntity<?> requestEntity = new HttpEntity<>(map, getHeaders());
         try {
+            log.debug("Payment initialize data : {}", requestEntity.getBody());
             return restTemplate.exchange(url, HttpMethod.POST, requestEntity, InitializePaymentResponse.class);
         }catch(RestClientException e){
             throw new RuntimeException("Internal Server Error " + e.getMessage(), e);
