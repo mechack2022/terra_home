@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jdk.jfr.Category;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -49,6 +50,12 @@ public class Event {
     @ToString.Exclude
     private Set<Ticket> tickets = new HashSet<>();
 
+    private Integer noOfTicketSales = 0;
+    private BigDecimal totalTicketSalePrice = BigDecimal.ZERO;
+
+    private BigDecimal eventCharges = BigDecimal.ZERO;
+
+    private BigDecimal withdrawalAmount = BigDecimal.ZERO;
     private LocalDateTime createAt;
 
     private LocalDateTime updatedAt;

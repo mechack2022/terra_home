@@ -10,4 +10,5 @@ public interface GoerPaymentLogRepository extends JpaRepository<GoerPayLog, Long
 
   Optional<GoerPayLog> findByGoer(Goer goer);
 
+    Optional<GoerPayLog> findByGoerId(Long goerId);
 }
