@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 //@ToString
-@Table(name="users")
+@Table(name = "users")
 public class User {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -39,8 +39,11 @@ public class User {
     private List<Event> eventList = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="account_Id")
+    @JoinColumn(name = "account_Id")
     private BeneficiaryAccount creatorAccount;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name="wallet_id")
+    private Wallet creatorWallet;
 
     private LocalDateTime createdAt;
 
