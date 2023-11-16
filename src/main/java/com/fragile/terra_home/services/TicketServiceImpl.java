@@ -1,6 +1,7 @@
 package com.fragile.terra_home.services;
 
 import com.fragile.terra_home.constants.ApiConstant;
+import com.fragile.terra_home.constants.EventStatus;
 import com.fragile.terra_home.constants.UserRole;
 import com.fragile.terra_home.dto.request.BuyTicketRequestDto;
 import com.fragile.terra_home.dto.response.ApiResponse;
@@ -81,7 +82,7 @@ public class TicketServiceImpl implements TicketServices {
         try {
 //           is event exist, get event tickets
             Optional<Event> event = eventRepository.findById(eventId);
-            if (event.isPresent()) {
+            if (event.isPresent() && event.get().getEventStatus().equals(EventStatus.ACTIVE)) {
                 // get te event tickets
                 Set<Ticket> eventTickets = event.get().getTickets();
                 if (eventTickets.isEmpty()) {
@@ -113,7 +114,7 @@ public class TicketServiceImpl implements TicketServices {
                 }
                 throw new ResourceNotFoundException("Ticket not found with id : " + ticketId);
             }
-            throw new ResourceNotFoundException("Event not found with id : " + eventId);
+            throw new ResourceNotFoundException("Event not found with id : " + eventId + "  Or event closed.");
         } catch (Exception ex) {
             throw new RuntimeException("Internal Server error: " + ex.getMessage(), ex);
         }

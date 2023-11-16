@@ -4,6 +4,7 @@ import com.fragile.terra_home.constants.EventStatus;
 import com.fragile.terra_home.entities.Event;
 import com.fragile.terra_home.repository.EventRepository;
 import com.fragile.terra_home.services.EventServices;
+import com.fragile.terra_home.services.PaystackServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ import java.util.List;
 public class EventScheduler {
 
     private  final EventRepository eventRepository;
+
+    private final PaystackServices paystackServices;
     @Scheduled(cron = "0 */5 * * * *")
     public void deactivateExpiredEvents() {
         LocalDateTime currentDateTime = LocalDateTime.now();
@@ -24,6 +27,8 @@ public class EventScheduler {
         eventRepository.findAll().stream()
                 .filter(event -> !isEventActive(event, currentDateTime))
                 .forEach(this::deactivateEvent);
+//        credit all creators that the events has been closed
+        paystackServices.creditAllCreatorsWithEventClosed();
     }
 
     private void deactivateEvent(Event event) {
@@ -35,11 +40,9 @@ public class EventScheduler {
     private boolean isEventActive(Event event, LocalDateTime currentDateTime) {
         // Check if current date and time are within the event's start and end dates
         boolean isDateInRange = currentDateTime.isAfter(event.getStartDate()) && currentDateTime.isBefore(event.getEndDate());
-
         // Check if the current time is within the event's start and end times
         LocalTime currentTime = currentDateTime.toLocalTime();
         boolean isTimeInRange = currentTime.isAfter(event.getStartTime()) && currentTime.isBefore(event.getEndTime());
-
         // Return true if both date and time are within the ranges
         return isDateInRange && isTimeInRange;
     }

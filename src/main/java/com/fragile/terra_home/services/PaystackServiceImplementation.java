@@ -1,22 +1,16 @@
 package com.fragile.terra_home.services;
 
 import com.fragile.terra_home.constants.ApiConstant;
+import com.fragile.terra_home.constants.EventStatus;
 import com.fragile.terra_home.constants.TransactionStatus;
 import com.fragile.terra_home.dto.response.ApiResponse;
 import com.fragile.terra_home.dto.response.InitializePaymentResponse;
 import com.fragile.terra_home.dto.response.PaymentVerificationResponse;
-import com.fragile.terra_home.entities.Event;
-import com.fragile.terra_home.entities.Goer;
-import com.fragile.terra_home.entities.GoerPayLog;
-import com.fragile.terra_home.entities.Ticket;
+import com.fragile.terra_home.entities.*;
 import com.fragile.terra_home.exceptions.PayStackExcption;
 import com.fragile.terra_home.exceptions.ResourceNotFoundException;
-import com.fragile.terra_home.repository.EventRepository;
-import com.fragile.terra_home.repository.GoerPaymentLogRepository;
-import com.fragile.terra_home.repository.GoerRepository;
-import com.fragile.terra_home.repository.TicketRepository;
+import com.fragile.terra_home.repository.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -26,10 +20,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static com.fragile.terra_home.constants.ApiConstant.PAYSTACK_INITIALIZE_PAY;
 import static com.fragile.terra_home.constants.ApiConstant.PAYSTACK_VERIFY;
@@ -38,11 +29,14 @@ import static com.fragile.terra_home.constants.ApiConstant.PAYSTACK_VERIFY;
 @RequiredArgsConstructor
 @Slf4j
 public class PaystackServiceImplementation implements PaystackServices {
+    private final UserRepository userRepository;
     private final EventRepository eventRepository;
 
     private final GoerRepository goerRepository;
 
     private final TicketRepository ticketRepository;
+
+    private final WalletRepository walletRepository;
 
     private final ApiCallServices apiCallServices;
 
@@ -85,7 +79,6 @@ public class PaystackServiceImplementation implements PaystackServices {
             throw new PayStackExcption("Paystack is unable to initialize payment at the moment", HttpStatus.BAD_REQUEST);
         }
     }
-
 
 
     private void createGoerPaymentLog(Goer goer, InitializePaymentResponse.Data data) {
@@ -169,13 +162,38 @@ public class PaystackServiceImplementation implements PaystackServices {
 
     }
 
-//      private GoerPayLog isTransactionSuccess(Long goerId){
-//          Goer goer = goerRepository.findById(goerId).orElseThrow(() -> new ResourceNotFoundException("Goer not found with this id : " + goerId));
-//          GoerPayLog paymentLog = goerPaymentLogRepository.findByGoer(goer).orElseThrow(() -> new ResourceNotFoundException("No PaymentLog for this goer"));
-////        check if transaction has been made for this goer ticket
-//          if (paymentLog.getTransactionStatus().equals(TransactionStatus.SUCCESS)) {
-//              throw new ResourceNotFoundException("Ticket transaction has been made for this ticketId " + goer.getTicket().getId(), HttpStatus.CONFLICT);
-//          }
-//          return paymentLog;
-//     }
+    @Override
+    @Transactional
+    public ResponseEntity<?> creditAllCreatorsWithEventClosed() {
+        try {
+            List<Event> eventList = eventRepository.findAll();
+            eventList.stream().filter(event -> event.getEventStatus().equals(EventStatus.CLOSED))
+                    .forEach(this::fundCreatorWalletWithWithdrawableAmount);
+            return new ResponseEntity<>("Creators with closed events was credited successfully", HttpStatus.CREATED);
+        } catch (Exception e) {
+            throw new RuntimeException("Internal Server Error " + e.getMessage(), e);
+        }
+
+    }
+
+    private void fundCreatorWalletWithWithdrawableAmount(Event event) {
+//       found the event creator wallet
+        if (event != null) {
+            User eventCreator = event.getEventCreator();
+            Optional<Wallet> creatorWallet = walletRepository.findByUser(eventCreator);
+            BigDecimal walletBalance = eventCreator.getCreatorWallet().getWalletBalance();
+//           update the walletBalance of the creator
+            BigDecimal updatedCreatorBalance = walletBalance.add(event.getWithdrawalAmount());
+            if (creatorWallet.isPresent()) {
+                if (eventCreator.getCreatorWallet().getId().equals(creatorWallet.get().getId())) {
+                    creatorWallet.get().setWalletBalance(updatedCreatorBalance);
+                }
+                throw new ResourceNotFoundException("EventWallet id  does not match the  wallet id", HttpStatus.BAD_REQUEST);
+            }
+            throw new ResourceNotFoundException("CreatorWallet does not exist", HttpStatus.BAD_REQUEST);
+        }
+        throw new ResourceNotFoundException("Event is null", HttpStatus.BAD_REQUEST);
+
+    }
+
 }
